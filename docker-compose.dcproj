@@ -5,7 +5,7 @@
     <DockerTargetOS>Linux</DockerTargetOS>
     <ProjectGuid>{3253352A-EDD9-48F8-843B-8BE4B90DD6BB}</ProjectGuid>
     <DockerLaunchBrowser>True</DockerLaunchBrowser>
-    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/weatherforecast</DockerServiceUrl>
+    <DockerServiceUrl>{Scheme}://localhost:{ServicePort}/api/customer</DockerServiceUrl>
     <DockerServiceName>customermanagement</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
