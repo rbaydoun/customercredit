@@ -6,4 +6,12 @@
   </PropertyGroup>
 
 
+  <ItemGroup>
+    <None Remove="Datastore\" />
+    <None Remove="Datastore\Entities\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Datastore\" />
+    <Folder Include="Datastore\Entities\" />
+  </ItemGroup>
 </Project>
