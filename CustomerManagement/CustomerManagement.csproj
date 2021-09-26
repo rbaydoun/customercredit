@@ -14,10 +14,12 @@
     <None Remove="Datastore\Models\" />
     <None Remove="Microsoft.AspNetCore.JsonPatch" />
     <None Remove="Microsoft.AspNetCore.Mvc.NewtonsoftJson" />
+    <None Remove="Datastore\Encryption\" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Datastore\" />
     <Folder Include="Datastore\Models\" />
+    <Folder Include="Datastore\Encryption\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.10" />

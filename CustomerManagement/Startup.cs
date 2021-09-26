@@ -25,6 +25,7 @@ namespace CustomerManagement
     public void ConfigureServices(IServiceCollection services)
     {
       services.AddControllers().AddNewtonsoftJson();
+      services.AddDataProtection();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

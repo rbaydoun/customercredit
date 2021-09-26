@@ -36,7 +36,7 @@ namespace CustomerManagement.Datastore
         {
             modelBuilder.HasPostgresEnum(null, "card_type", new[] { "Amex", "Visa", "MasterCard" })
                 .HasAnnotation("Relational:Collation", "en_US.UTF-8");
-
+            
             modelBuilder.Entity<Card>(entity =>
             {
                 entity.ToTable("cards");
