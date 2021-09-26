@@ -23,14 +23,6 @@ namespace CustomerManagement.Datastore
         public virtual DbSet<Card> Cards { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
 
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    //if (!optionsBuilder.IsConfigured)
-        //    //{
-        //    //  optionsBuilder.UseNpgsql(ConfigurationManager);
-        //    //}
-        //}
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresEnum(null, "card_type", new[] { "Amex", "Visa", "MasterCard" })
