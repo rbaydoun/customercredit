@@ -130,8 +130,22 @@ namespace CustomerManagement.Controllers
 
       try
       {
+        var customerCard = db.Cards.Find(card.Number);
 
+        bool validCard = false;
+        if (customerCard != null)
+        {
+          // Run validation.
+          if ((customerCard.Cvv == card.Cvv) &&
+             (customerCard.ExpiryDate == card.ExpiryDate) &&
+             (customerCard.Type == card.Type) &&
+             (customerCard.CustomerId == id))
+          {
+            validCard = true;
+          }
+        }
 
+        return StatusCode(StatusCodes.Status200OK, validCard);
       }
       catch (Exception ex)
       {
