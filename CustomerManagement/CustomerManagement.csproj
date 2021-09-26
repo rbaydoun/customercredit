@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <None Remove="Datastore\" />
-    <None Remove="Datastore\Entities\" />
     <None Remove="Microsoft.EntityFrameworkCore" />
     <None Remove="Npgsql.EntityFrameworkCore.PostgreSQL" />
     <None Remove="Microsoft.EntityFrameworkCore.Tools" />
@@ -18,7 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Datastore\" />
-    <Folder Include="Datastore\Entities\" />
     <Folder Include="Datastore\Models\" />
   </ItemGroup>
   <ItemGroup>
