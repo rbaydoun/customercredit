@@ -27,6 +27,12 @@ namespace CustomerManagement.Controllers
     }
 
     // GET: customer
+    /// <summary>
+    /// Retrieve a list of all customers in the data store.
+    /// </summary>
+    /// <response code="200">Customers successfully patched.</response>
+    /// <response code="500">Internal server error.</response>
+    /// <returns></returns>
     [HttpGet]
     public IEnumerable<Customer> Get()
     {
@@ -35,6 +41,13 @@ namespace CustomerManagement.Controllers
     }
 
     // GET customer/{id}
+    /// <summary>
+    /// Retrieve a specific custommer from the data store.
+    /// </summary>
+    /// <param name="id">The ID of the customer for which to retrieve the information.</param>
+    /// <response code="200">Customer successfully retrieved.</response>
+    /// <response code="500">Internal server error.</response>
+    /// <returns></returns>
     [HttpGet("{id}")]
     public Customer Get(long id)
     {
@@ -44,6 +57,13 @@ namespace CustomerManagement.Controllers
     }
 
     // POST customer
+    /// <summary>
+    /// Create a new customer and persists their information in the data store.
+    /// </summary>
+    /// <param name="model">JSON Body containing all required fields for customer creation</param>
+    /// <response code="201">Customer successfully created.</response>
+    /// <response code="500">Internal server error.</response>
+    /// <returns></returns>
     [HttpPost]
     public IActionResult Post([FromBody] Customer model)
     {
@@ -62,6 +82,15 @@ namespace CustomerManagement.Controllers
     }
 
     // PATCH customer/{id}
+    /// <summary>
+    /// Patch method to update fields for a specific customer.
+    /// </summary>
+    /// <param name="id">The ID of the customer to update.</param>
+    /// <param name="patch">The JSON patch describing the information to update.</param>
+    /// <response code="200">Customer successfully patched.</response>
+    /// <response code="204">Customer doesn't exist.</response>
+    /// <response code="500">Internal server error.</response>
+    /// <returns></returns>
     [HttpPatch("{id}")]
     public IActionResult Patch(long id, [FromBody] JsonPatchDocument<Customer> patch)
     {
@@ -89,6 +118,13 @@ namespace CustomerManagement.Controllers
     }
 
     // DELETE customer/{id}
+    /// <summary>
+    /// Method to delete a specific customer profile.
+    /// </summary>
+    /// <param name="id">The ID of the customer to delete.</param>
+    /// <response code="200">Customer successfully deleted.</response>
+    /// <response code="500">Internal server error.</response>
+    /// <returns></returns>
     [HttpDelete("{id}")]
     public IActionResult Delete(long id)
     {
@@ -112,6 +148,16 @@ namespace CustomerManagement.Controllers
     }
 
     // GET customer/{id}/card
+    /// <summary>
+    /// Validate the ownership of a creadit card (described by "model") by a
+    /// customer identified by "id".
+    /// credit card described by the "model" JSON body.
+    /// </summary>
+    /// <param name="id">The ID of the customer for whom to verify ownership.</param>
+    /// <param name="model">Description of the card.</param>
+    /// <response code="200"></response>
+    /// <response code="500">Internal server error.</response>
+    /// <returns>True: The customer owns the decribed card. False otherwise.</returns>
     [HttpGet("{id}/card")]
     public IActionResult Get(long id, [FromBody] Card model)
     {
@@ -148,7 +194,16 @@ namespace CustomerManagement.Controllers
       }
     }
 
-    // POST card
+    // POST customer/{id}/card
+    /// <summary>
+    /// Add a new credit card to a customer.
+    /// </summary>
+    /// <param name="id">The ID of the customer for which to add the card.</param>
+    /// <param name="model">Description of the card to add.</param>
+    /// <response code="200">Card successfully created.</response>
+    /// <response code="400">Card already exists.</response>
+    /// <response code="500">Internal server error.</response>
+    /// <returns></returns>
     [HttpPost("{id}/card")]
     public IActionResult Post(long id, [FromBody] Card model)
     {
@@ -183,6 +238,16 @@ namespace CustomerManagement.Controllers
     }
 
     // PATCH customer/{id}/card/{number}
+    /// <summary>
+    /// Update a specific card of a specified customer.
+    /// </summary>
+    /// <param name="id">The ID of the customer having ownership of the card.</param>
+    /// <param name="number">The card number to update.</param>
+    /// <param name="patch">The JSON patch</param>
+    /// <response code="200">Card successfully patched.</response>
+    /// <response code="204">Card doesn't exist.</response>
+    /// <response code="500">Internal server error.</response>
+    /// <returns></returns>
     [HttpPatch("{id}/card/{number}")]
     public IActionResult Patch(long id, string number, [FromBody] JsonPatchDocument<Card> patch)
     {
@@ -216,6 +281,14 @@ namespace CustomerManagement.Controllers
     }
 
     // DELETE customer/{id}/card/{number}
+    /// <summary>
+    /// Delete a credit card from a customer profile.
+    /// </summary>
+    /// <param name="id">The ID of the customer owning the card.</param>
+    /// <param name="number">The card number to delete.</param>
+    /// <response code="200">Card successfully deleted.</response>
+    /// <response code="500">Internal server error.</response>
+    /// <returns></returns>
     [HttpDelete("{id}/card/{number}")]
     public IActionResult Delete(long id, string number)
     {
