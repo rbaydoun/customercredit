@@ -24,16 +24,12 @@ namespace CustomerManagement.DAL
 
     public void Insert(Card model)
     {
-      //var existingCard = GetByCustomerIdAndNumber(model.CustomerId, model.Number);
-      //if (existingCard == null)
-      //{
-        var protectedNumber = protector.Protect(model.Number);
-        var protectedCvv = protector.Protect(model.Cvv);
+      var protectedNumber = protector.Protect(model.Number);
+      var protectedCvv = protector.Protect(model.Cvv);
 
-        model.Number = protectedNumber;
-        model.Cvv = protectedCvv;
-        dbContext.Cards.Add(model);
-      //}
+      model.Number = protectedNumber;
+      model.Cvv = protectedCvv;
+      dbContext.Cards.Add(model);
     }
 
     /// <summary>
@@ -86,9 +82,6 @@ namespace CustomerManagement.DAL
     {
       card.Number = protector.Protect(card.Number);
       card.Cvv = protector.Protect(card.Cvv);
-
-      //dbContext.Cards.Attach(card);
-      //dbContext.Entry(card).State = EntityState.Modified;
     }
 
     /// <summary>

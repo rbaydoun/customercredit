@@ -259,31 +259,6 @@ namespace CustomerManagement.Controllers
       {
         return StatusCode(StatusCodes.Status500InternalServerError, ex);
       }
-      //try
-      //{
-      //  var card = dbContext.Cards
-      //    .Where(c => c.CustomerId == id)
-      //    .ToList()
-      //    .First(c => protector.Unprotect(c.Number) == number);
-
-      //  if (card != null)
-      //  {
-      //    patch.ApplyTo(card, ModelState);
-      //    card.Number = protector.Protect(card.Number);
-      //    card.Cvv = protector.Protect(card.Cvv);
-      //    dbContext.SaveChanges();
-
-      //    return StatusCode(StatusCodes.Status200OK, card);
-      //  }
-      //  else
-      //  {
-      //    return StatusCode(StatusCodes.Status204NoContent);
-      //  }
-      //}
-      //catch (Exception ex)
-      //{
-      //  return StatusCode(StatusCodes.Status500InternalServerError, ex);
-      //}
     }
 
     // DELETE customer/{id}/card/{number}
