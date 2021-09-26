@@ -61,10 +61,10 @@ namespace CustomerManagement.Datastore
                     .IsRequired()
                     .HasColumnName("type");
 
-                entity.HasOne(d => d.Customer)
-                    .WithMany(p => p.Cards)
-                    .HasForeignKey(d => d.CustomerId)
-                    .HasConstraintName("cards_customer_id_fkey");              
+                //entity.HasOne(d => d.Customer)
+                //    .WithMany(p => p.Cards)
+                //    .HasForeignKey(d => d.CustomerId)
+                //    .HasConstraintName("cards_customer_id_fkey");              
             });
 
             modelBuilder.Entity<Customer>(entity =>

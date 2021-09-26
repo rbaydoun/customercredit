@@ -14,6 +14,6 @@ namespace CustomerManagement.Datastore.Models
         public string Cvv { get; set; }
         public long? CustomerId { get; set; }
 
-        public virtual Customer Customer { get; set; }
+        //public virtual Customer Customer { get; set; }
     }
 }
