@@ -5,7 +5,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using CustomerManagement.DAL;
-using CustomerManagement.Datastore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -49,6 +48,7 @@ namespace CustomerManagement
       services.AddDbContext<CustomerManagementContext>(options =>
         options.UseNpgsql(Configuration.GetConnectionString("CustomerManagement")));
       services.AddDataProtection();
+      services.AddTransient<UnitOfWork, UnitOfWork>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

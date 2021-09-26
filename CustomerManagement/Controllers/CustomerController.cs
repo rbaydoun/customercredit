@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CustomerManagement.DAL;
-using CustomerManagement.Datastore.Encryption;
 using CustomerManagement.Models;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -18,15 +18,10 @@ namespace CustomerManagement.Controllers
   [Route("[controller]")]
   public class CustomerController : Controller
   {
-    //private readonly IDataProtector protector;
-    //private readonly CustomerManagementContext dbContext;
-
-    public CustomerController(IDataProtectionProvider dataProtectionProvider/*, CustomerManagementContext dbContext*/)
+    private readonly UnitOfWork unitOfWork;
+    public CustomerController(UnitOfWork unitOfWork)
     {
-      protector = dataProtectionProvider
-        .CreateProtector(DataProtectionPurposeStrings.CreditCardInformation);
-
-      //this.dbContext = dbContext;
+      this.unitOfWork = unitOfWork;
     }
 
     // GET: customer
@@ -38,8 +33,8 @@ namespace CustomerManagement.Controllers
     /// <returns></returns>
     [HttpGet]
     public IEnumerable<Customer> Get()
-    {
-      return dbContext.Customers.ToList();
+    { 
+      return unitOfWork.CustomerRepository.GetAll();
     }
 
     // GET customer/{id}
@@ -53,8 +48,7 @@ namespace CustomerManagement.Controllers
     [HttpGet("{id}")]
     public Customer Get(long id)
     {
-      var customer = dbContext.Customers.Find(id);
-      return customer;
+      return unitOfWork.CustomerRepository.GetById(id);
     }
 
     // POST customer
@@ -63,6 +57,7 @@ namespace CustomerManagement.Controllers
     /// </summary>
     /// <param name="model">JSON Body containing all required fields for customer creation</param>
     /// <response code="201">Customer successfully created.</response>
+    /// <response code="400">Bad Request.</response>
     /// <response code="500">Internal server error.</response>
     /// <returns></returns>
     [HttpPost]
@@ -70,10 +65,18 @@ namespace CustomerManagement.Controllers
     {
       try
       {
-        var newCustomer = dbContext.Customers.Add(model);
-        dbContext.SaveChanges();
+        if (ModelState.IsValid)
+        {
+          unitOfWork.CustomerRepository.Insert(model);
+          unitOfWork.Save();
 
-        return StatusCode(StatusCodes.Status201Created, model);
+          return StatusCode(StatusCodes.Status201Created, model);
+
+        }
+        else
+        {
+          return StatusCode(StatusCodes.Status400BadRequest, model);
+        }  
       }
       catch (Exception ex)
       {
@@ -96,18 +99,16 @@ namespace CustomerManagement.Controllers
     {
       try
       {
-        var customer = dbContext.Customers.FirstOrDefault(customer => customer.Id == id);
+        var customer = unitOfWork.CustomerRepository.GetById(id);
+
         if (customer != null)
         {
           patch.ApplyTo(customer, ModelState);
-          dbContext.SaveChanges();
+          unitOfWork.Save();
 
           return StatusCode(StatusCodes.Status200OK, customer);
         }
-        else
-        {
-          return StatusCode(StatusCodes.Status204NoContent);
-        }
+        return StatusCode(StatusCodes.Status204NoContent);
       }
       catch (Exception ex)
       {
@@ -130,10 +131,8 @@ namespace CustomerManagement.Controllers
       // of that implementaion detail.
       try
       {
-        var customer = new Customer() { Id = id };
-        dbContext.Customers.Attach(customer);
-        dbContext.Customers.Remove(customer);
-        dbContext.SaveChanges();
+        unitOfWork.CustomerRepository.Delete(id);
+        unitOfWork.Save();
 
         return StatusCode(StatusCodes.Status200OK);
       }
@@ -152,35 +151,33 @@ namespace CustomerManagement.Controllers
     /// <param name="id">The ID of the customer for whom to verify ownership.</param>
     /// <param name="model">Description of the card.</param>
     /// <response code="200"></response>
+    /// <response code="400">The input data is bad.</response>
     /// <response code="500">Internal server error.</response>
     /// <returns>True: The customer owns the decribed card. False otherwise.</returns>
     [HttpGet("{id}/card")]
     public IActionResult Get(long id, [FromBody] Card model)
     {
+      bool validCard = false;
       try
-      {
-        var customerCard = dbContext.Cards
-          .Where(c => c.CustomerId == id)
-          .ToList()
-          .First(c => protector.Unprotect(c.Number) == model.Number);
-
-        bool validCard = false;
-        if (customerCard != null)
+      { 
+        if (ModelState.IsValid)
         {
-          var unprotectedNumber = protector.Unprotect(customerCard.Number);
-          var unprotectedCvv = protector.Unprotect(customerCard.Cvv);
-
-          // Run validation.
-          if ((customerCard.Cvv == model.Cvv) &&
-             (customerCard.ExpiryDate == model.ExpiryDate) &&
-             (customerCard.Type == model.Type) &&
-             (customerCard.CustomerId == id))
+          var customerCard = unitOfWork.CardRepository.GetByCustomerIdAndNumber(id, model.Number);
+          if (customerCard != null)
           {
-            validCard = true;
+            if ((customerCard.Cvv == model.Cvv) &&
+                (customerCard.ExpiryDate == model.ExpiryDate) &&
+                (customerCard.Type == model.Type) &&
+                (customerCard.CustomerId == id))
+            {
+              validCard = true;
+            }
           }
+
+          return StatusCode(StatusCodes.Status200OK, validCard);
         }
 
-        return StatusCode(StatusCodes.Status200OK, validCard);
+        return StatusCode(StatusCodes.Status400BadRequest, model);
       }
       catch (Exception ex)
       {
@@ -203,26 +200,23 @@ namespace CustomerManagement.Controllers
     {
       try
       {
-        var card = dbContext.Cards
-          .Where(c => c.CustomerId == id)
-          .ToList()
-          .First(c => protector.Unprotect(c.Number) == model.Number);
-
-        if (card == null)
+        string newNumber = model.Number;    // Used becasue the model will get encrypted.
+        if (ModelState.IsValid)
         {
-          model.Number = protector.Protect(model.Number);
-          model.Cvv = protector.Protect(model.Cvv);
-          model.CustomerId = id;
-          dbContext.Cards.Add(model);
-          dbContext.SaveChanges();
+          var customerCard = unitOfWork.CardRepository.GetByCustomerIdAndNumber(id, newNumber);
 
-          return StatusCode(StatusCodes.Status201Created, model);
-        }
-        else
-        {
-          return StatusCode(StatusCodes.Status400BadRequest);
+          if (customerCard == null)
+          {
+            model.CustomerId = id;
+            unitOfWork.CardRepository.Insert(model);
+            unitOfWork.Save();
+
+            var newCard = unitOfWork.CardRepository.GetByCustomerIdAndNumber(id, newNumber);
+            return StatusCode(StatusCodes.Status201Created, newCard);
+          }
         }
 
+        return StatusCode(StatusCodes.Status400BadRequest, "Card already exists.");
       }
       catch (Exception ex)
       {
@@ -246,29 +240,50 @@ namespace CustomerManagement.Controllers
     {
       try
       {
-        var card = dbContext.Cards
-          .Where(c => c.CustomerId == id)
-          .ToList()
-          .First(c => protector.Unprotect(c.Number) == number);
+        var customerCard = unitOfWork.CardRepository.GetByCustomerIdAndNumber(id, number);
 
-        if (card != null)
+        if (customerCard != null)
         {
-          patch.ApplyTo(card, ModelState);
-          card.Number = protector.Protect(card.Number);
-          card.Cvv = protector.Protect(card.Cvv);
-          dbContext.SaveChanges();
+          patch.ApplyTo(customerCard, ModelState);
+          unitOfWork.CardRepository.Update(customerCard);
+          unitOfWork.Save();
 
-          return StatusCode(StatusCodes.Status200OK, card);
+          var newCard = unitOfWork.CardRepository.GetCardById(customerCard.Id);
+          return StatusCode(StatusCodes.Status200OK, customerCard);
+
         }
-        else
-        {
-          return StatusCode(StatusCodes.Status204NoContent);
-        }
+        return StatusCode(StatusCodes.Status204NoContent);
+
       }
       catch (Exception ex)
       {
         return StatusCode(StatusCodes.Status500InternalServerError, ex);
       }
+      //try
+      //{
+      //  var card = dbContext.Cards
+      //    .Where(c => c.CustomerId == id)
+      //    .ToList()
+      //    .First(c => protector.Unprotect(c.Number) == number);
+
+      //  if (card != null)
+      //  {
+      //    patch.ApplyTo(card, ModelState);
+      //    card.Number = protector.Protect(card.Number);
+      //    card.Cvv = protector.Protect(card.Cvv);
+      //    dbContext.SaveChanges();
+
+      //    return StatusCode(StatusCodes.Status200OK, card);
+      //  }
+      //  else
+      //  {
+      //    return StatusCode(StatusCodes.Status204NoContent);
+      //  }
+      //}
+      //catch (Exception ex)
+      //{
+      //  return StatusCode(StatusCodes.Status500InternalServerError, ex);
+      //}
     }
 
     // DELETE customer/{id}/card/{number}
@@ -283,27 +298,28 @@ namespace CustomerManagement.Controllers
     [HttpDelete("{id}/card/{number}")]
     public IActionResult Delete(long id, string number)
     {
-      // Database will delete cards on cascade. The software shouldn't be aware
-      // of that implementaion detail.
+
       try
       {
-        var card = dbContext.Cards
-          .Where(c => c.CustomerId == id)
-          .ToList()
-          .First(c => protector.Unprotect(c.Number) == number);
-
-        if (card != null)
-        {
-          dbContext.Cards.Remove(card);
-          dbContext.SaveChanges();
-        }
+        unitOfWork.CardRepository.DeleteByCustomerIdAndNumber(id, number);
+        unitOfWork.Save();
 
         return StatusCode(StatusCodes.Status200OK);
+
       }
       catch (Exception ex)
       {
         return StatusCode(StatusCodes.Status500InternalServerError, ex);
       }
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+      if (disposing)
+      {
+        unitOfWork.Dispose();
+      }
+      base.Dispose(disposing);
     }
   }
 }

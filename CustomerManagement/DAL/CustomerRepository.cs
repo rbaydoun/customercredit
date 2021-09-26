@@ -8,7 +8,6 @@ namespace CustomerManagement.DAL
 {
   public class CustomerRepository
   {
-
     private readonly CustomerManagementContext dbContext;
     
     public CustomerRepository(CustomerManagementContext dbContext)

@@ -21,12 +21,13 @@ ALTER TABLE customers OWNER TO cm_service;
 
 CREATE TABLE IF NOT EXISTS cards
 (
+  id bigserial NOT NULL,
   number text NOT NULL,
   type card_type NOT NULL,
   expiry_date date NOT NULL,
   cvv text NOT NULL,
-  customer_id bigint references customers(id) on delete cascade,
-  PRIMARY KEY (number)
+  customer_id bigint NOT NULL references customers(id) on delete cascade,
+  PRIMARY KEY (id)
 );
 ALTER TABLE cards OWNER TO cm_service;
 

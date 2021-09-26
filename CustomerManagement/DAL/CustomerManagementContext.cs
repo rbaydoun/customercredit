@@ -31,11 +31,13 @@ namespace CustomerManagement.DAL
             
             modelBuilder.Entity<Card>(entity =>
             {
+                
                 entity.ToTable("cards");
-                entity.HasKey(e => e.Number);
+                entity.Property(e => e.Id).HasColumnName("id");
 
-
-                entity.Property(e => e.CustomerId).HasColumnName("customer_id");
+                entity.Property(e => e.CustomerId)
+                    .IsRequired()
+                    .HasColumnName("customer_id");
 
                 entity.Property(e => e.Cvv)
                     .IsRequired()

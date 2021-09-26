@@ -37,6 +37,23 @@ namespace CustomerManagement.DAL
     }
 
     /// <summary>
+    /// Get credit card by its ID
+    /// </summary>
+    /// <param name="id">The ID of the card.</param>
+    /// <returns>The card with unencrypted data.</returns>
+    public Card GetCardById(long id)
+    {
+      var card = dbContext.Cards.Find(id);
+      var unprotectedNumber = protector.Unprotect(card.Number);
+      var unprotectedCvv = protector.Unprotect(card.Cvv);
+
+      card.Number = unprotectedNumber;
+      card.Cvv = unprotectedCvv;
+
+      return card;
+    }
+
+    /// <summary>
     /// Retrieve a credit card entry by number, owned by a customer.
     /// </summary>
     /// <param name="id">The Id of the customer owning the card.</param>
@@ -44,26 +61,21 @@ namespace CustomerManagement.DAL
     /// <returns></returns>
     public Card GetByCustomerIdAndNumber(long id, string number)
     {
-      var encryptedCard = dbContext.Cards
+      var card = dbContext.Cards
         .Where(c => c.CustomerId == id)
         .ToList()
-        .First(c => protector.Unprotect(c.Number) == number);
+        .FirstOrDefault(c => protector.Unprotect(c.Number) == number);
 
-      if (encryptedCard != null)
-      {
-        var unprotectedNumber = protector.Unprotect(encryptedCard.Number);
-        var unprotectedCvv = protector.Unprotect(encryptedCard.Cvv);
+      if (card != null)
+      {        
+        var unprotectedNumber = protector.Unprotect(card.Number);
+        var unprotectedCvv = protector.Unprotect(card.Cvv);
 
-        return new Card()
-        {
-          Number = unprotectedNumber,
-          Type = encryptedCard.Type,
-          ExpiryDate = encryptedCard.ExpiryDate,
-          Cvv = unprotectedCvv,
-          CustomerId = encryptedCard.CustomerId
-        };
+        card.Number = unprotectedNumber;
+        card.Cvv = unprotectedCvv;
+        return card;
       }
-      return null;
+      return card;
     }
 
     /// <summary>
@@ -75,8 +87,8 @@ namespace CustomerManagement.DAL
       card.Number = protector.Protect(card.Number);
       card.Cvv = protector.Protect(card.Cvv);
 
-      dbContext.Cards.Attach(card);
-      dbContext.Entry(card).State = EntityState.Modified;
+      //dbContext.Cards.Attach(card);
+      //dbContext.Entry(card).State = EntityState.Modified;
     }
 
     /// <summary>
