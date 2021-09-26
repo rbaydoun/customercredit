@@ -19,11 +19,14 @@ namespace CustomerManagement.Controllers
   public class CustomerController : Controller
   {
     private readonly IDataProtector protector;
+    private readonly CustomerManagementContext dbContext;
 
-    public CustomerController(IDataProtectionProvider dataProtectionProvider)
+    public CustomerController(IDataProtectionProvider dataProtectionProvider, CustomerManagementContext dbContext)
     {
       protector = dataProtectionProvider
         .CreateProtector(DataProtectionPurposeStrings.CreditCardInformation);
+
+      this.dbContext = dbContext;
     }
 
     // GET: customer
@@ -36,8 +39,7 @@ namespace CustomerManagement.Controllers
     [HttpGet]
     public IEnumerable<Customer> Get()
     {
-      using var db = new CustomerManagementContext();
-      return db.Customers.ToList();
+      return dbContext.Customers.ToList();
     }
 
     // GET customer/{id}
@@ -51,8 +53,7 @@ namespace CustomerManagement.Controllers
     [HttpGet("{id}")]
     public Customer Get(long id)
     {
-      using var db = new CustomerManagementContext();
-      var customer = db.Customers.Find(id);
+      var customer = dbContext.Customers.Find(id);
       return customer;
     }
 
@@ -67,11 +68,10 @@ namespace CustomerManagement.Controllers
     [HttpPost]
     public IActionResult Post([FromBody] Customer model)
     {
-      using var db = new CustomerManagementContext();
       try
       {
-        var newCustomer = db.Customers.Add(model);
-        db.SaveChanges();
+        var newCustomer = dbContext.Customers.Add(model);
+        dbContext.SaveChanges();
 
         return StatusCode(StatusCodes.Status201Created, model);
       }
@@ -94,15 +94,13 @@ namespace CustomerManagement.Controllers
     [HttpPatch("{id}")]
     public IActionResult Patch(long id, [FromBody] JsonPatchDocument<Customer> patch)
     {
-      using var db = new CustomerManagementContext();
-
       try
       {
-        var customer = db.Customers.FirstOrDefault(customer => customer.Id == id);
+        var customer = dbContext.Customers.FirstOrDefault(customer => customer.Id == id);
         if (customer != null)
         {
           patch.ApplyTo(customer, ModelState);
-          db.SaveChanges();
+          dbContext.SaveChanges();
 
           return StatusCode(StatusCodes.Status200OK, customer);
         }
@@ -130,14 +128,12 @@ namespace CustomerManagement.Controllers
     {
       // Database will delete cards on cascade. The software shouldn't be aware
       // of that implementaion detail.
-      using var db = new CustomerManagementContext();
-
       try
       {
         var customer = new Customer() { Id = id };
-        db.Customers.Attach(customer);
-        db.Customers.Remove(customer);
-        db.SaveChanges();
+        dbContext.Customers.Attach(customer);
+        dbContext.Customers.Remove(customer);
+        dbContext.SaveChanges();
 
         return StatusCode(StatusCodes.Status200OK);
       }
@@ -161,11 +157,9 @@ namespace CustomerManagement.Controllers
     [HttpGet("{id}/card")]
     public IActionResult Get(long id, [FromBody] Card model)
     {
-      using var db = new CustomerManagementContext();
-
       try
       {
-        var customerCard = db.Cards
+        var customerCard = dbContext.Cards
           .Where(c => c.CustomerId == id)
           .ToList()
           .First(c => protector.Unprotect(c.Number) == model.Number);
@@ -207,10 +201,9 @@ namespace CustomerManagement.Controllers
     [HttpPost("{id}/card")]
     public IActionResult Post(long id, [FromBody] Card model)
     {
-      using var db = new CustomerManagementContext();
       try
       {
-        var card = db.Cards
+        var card = dbContext.Cards
           .Where(c => c.CustomerId == id)
           .ToList()
           .First(c => protector.Unprotect(c.Number) == model.Number);
@@ -220,8 +213,8 @@ namespace CustomerManagement.Controllers
           model.Number = protector.Protect(model.Number);
           model.Cvv = protector.Protect(model.Cvv);
           model.CustomerId = id;
-          db.Cards.Add(model);
-          db.SaveChanges();
+          dbContext.Cards.Add(model);
+          dbContext.SaveChanges();
 
           return StatusCode(StatusCodes.Status201Created, model);
         }
@@ -251,11 +244,9 @@ namespace CustomerManagement.Controllers
     [HttpPatch("{id}/card/{number}")]
     public IActionResult Patch(long id, string number, [FromBody] JsonPatchDocument<Card> patch)
     {
-      using var db = new CustomerManagementContext();
-
       try
       {
-        var card = db.Cards
+        var card = dbContext.Cards
           .Where(c => c.CustomerId == id)
           .ToList()
           .First(c => protector.Unprotect(c.Number) == number);
@@ -265,7 +256,7 @@ namespace CustomerManagement.Controllers
           patch.ApplyTo(card, ModelState);
           card.Number = protector.Protect(card.Number);
           card.Cvv = protector.Protect(card.Cvv);
-          db.SaveChanges();
+          dbContext.SaveChanges();
 
           return StatusCode(StatusCodes.Status200OK, card);
         }
@@ -294,19 +285,17 @@ namespace CustomerManagement.Controllers
     {
       // Database will delete cards on cascade. The software shouldn't be aware
       // of that implementaion detail.
-      using var db = new CustomerManagementContext();
-
       try
       {
-        var card = db.Cards
+        var card = dbContext.Cards
           .Where(c => c.CustomerId == id)
           .ToList()
           .First(c => protector.Unprotect(c.Number) == number);
 
         if (card != null)
         {
-          db.Cards.Remove(card);
-          db.SaveChanges();
+          dbContext.Cards.Remove(card);
+          dbContext.SaveChanges();
         }
 
         return StatusCode(StatusCodes.Status200OK);
