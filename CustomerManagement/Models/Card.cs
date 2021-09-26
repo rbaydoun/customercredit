@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 #nullable disable
 
-namespace CustomerManagement.Datastore.Models
+namespace CustomerManagement.Models
 {
     public partial class Card
     {

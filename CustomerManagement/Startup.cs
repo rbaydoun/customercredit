@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using CustomerManagement.DAL;
 using CustomerManagement.Datastore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

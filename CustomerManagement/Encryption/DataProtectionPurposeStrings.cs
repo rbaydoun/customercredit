@@ -1,9 +1,8 @@
 ﻿using System;
-namespace CustomerManagement.Datastore.Encryption
+namespace CustomerManagement.Encryption
 {
   public static class DataProtectionPurposeStrings
   {
     public static readonly string CreditCardInformation = "CreditCardInformation";
-
   }
 }

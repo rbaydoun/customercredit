@@ -1,12 +1,12 @@
 ﻿using System;
-using CustomerManagement.Datastore.Models;
+using CustomerManagement.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Npgsql;
 
 #nullable disable
 
-namespace CustomerManagement.Datastore
+namespace CustomerManagement.DAL
 {
     public partial class CustomerManagementContext : DbContext
     {
@@ -22,6 +22,7 @@ namespace CustomerManagement.Datastore
 
         public virtual DbSet<Card> Cards { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using CustomerManagement.Datastore;
+using CustomerManagement.DAL;
 using CustomerManagement.Datastore.Encryption;
-using CustomerManagement.Datastore.Models;
+using CustomerManagement.Models;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
@@ -18,15 +18,15 @@ namespace CustomerManagement.Controllers
   [Route("[controller]")]
   public class CustomerController : Controller
   {
-    private readonly IDataProtector protector;
-    private readonly CustomerManagementContext dbContext;
+    //private readonly IDataProtector protector;
+    //private readonly CustomerManagementContext dbContext;
 
-    public CustomerController(IDataProtectionProvider dataProtectionProvider, CustomerManagementContext dbContext)
+    public CustomerController(IDataProtectionProvider dataProtectionProvider/*, CustomerManagementContext dbContext*/)
     {
       protector = dataProtectionProvider
         .CreateProtector(DataProtectionPurposeStrings.CreditCardInformation);
 
-      this.dbContext = dbContext;
+      //this.dbContext = dbContext;
     }
 
     // GET: customer
@@ -145,7 +145,7 @@ namespace CustomerManagement.Controllers
 
     // GET customer/{id}/card
     /// <summary>
-    /// Validate the ownership of a creadit card (described by "model") by a
+    /// Validate the ownership of a credit card (described by "model") by a
     /// customer identified by "id".
     /// credit card described by the "model" JSON body.
     /// </summary>

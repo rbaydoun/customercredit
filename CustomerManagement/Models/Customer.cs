@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 #nullable disable
 
-namespace CustomerManagement.Datastore.Models
+namespace CustomerManagement.Models
 {
     public partial class Customer
     {
