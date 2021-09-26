@@ -1,4 +1,4 @@
-# lastpass-homework
+# customercredit
 
 ## What is missing
 * Connection to database should be secured with TLS.
