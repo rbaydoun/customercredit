@@ -1,0 +1,49 @@
+﻿-- DB Migration
+CREATE USER cm_service WITH ENCRYPTED PASSWORD 'ThisIsForTheLastPassHomework2021';
+CREATE DATABASE customer_management;
+ALTER DATABASE customer_management OWNER TO cm_service;
+GRANT ALL PRIVILEGES ON DATABASE customer_management TO cm_service;
+
+-- Create tables
+CREATE TYPE card_type AS ENUM ('amex', 'visa', 'master_card');
+ALTER TYPE card_type OWNER TO cm_service;
+
+CREATE TABLE IF NOT EXISTS customers
+(
+  id bigserial NOT NULL,
+  name text NOT NULL,
+  address text NOT NULL,
+  date_of_birth date NOT NULL,
+  
+  PRIMARY KEY (id)
+);
+ALTER TABLE customers OWNER TO cm_service;
+
+CREATE TABLE IF NOT EXISTS cards
+(
+  number text NOT NULL,
+  type card_type NOT NULL,
+  expiry_date date NOT NULL,
+  cvv text NOT NULL,
+  customer_id bigint references customers(id) on delete cascade,
+  PRIMARY KEY (number)
+);
+ALTER TABLE cards OWNER TO cm_service;
+
+
+
+
+################################################################################
+Patch method work this way:
+[
+    {
+        "value": "Isabelle Durette",    // New value
+        "path": "/Name",                // Target field
+        "op": "replace"                 // Operation
+    },
+    {
+        "value": "1982-10-14",
+        "path": "/dateOfBirth",
+        "op": "replace"
+    }
+]

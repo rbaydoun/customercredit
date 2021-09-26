@@ -2,47 +2,141 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CustomerManagement.Datastore;
+using CustomerManagement.Datastore.Models;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace CustomerManagement.Controllers
 {
-  [Route("api/[controller]")]
+  [Route("[controller]")]
   public class CustomerController : Controller
   {
-    // GET: api/values
+    // GET: customer
     [HttpGet]
-    public IEnumerable<string> Get()
+    public IEnumerable<Customer> Get()
     {
-      return new string[] { "value1", "value2" };
+      using var db = new CustomerManagementContext();
+      return db.Customers.ToList();
     }
 
-    // GET api/values/5
+    // GET customer/{id}
     [HttpGet("{id}")]
-    public string Get(int id)
+    public Customer Get(long id)
     {
-      return id.ToString();
+      using var db = new CustomerManagementContext();
+      var customer = db.Customers.Find(id);
+      return customer;
     }
 
-    // POST api/values
+    // POST customer
     [HttpPost]
-    public void Post([FromBody] string value)
+    public IActionResult Post([FromBody] Customer model)
     {
+      using var db = new CustomerManagementContext();
+      try
+      {
+        var newCustomer = db.Customers.Add(model);
+        db.SaveChanges();
 
+        return StatusCode(StatusCodes.Status201Created, model);
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(StatusCodes.Status500InternalServerError, ex);
+      }
     }
 
-    // PUT api/values/5
-    [HttpPut("{id}")]
-    public void Put(int id, [FromBody] string value)
+    // POST card
+    [HttpPost("{id}/card")]
+    public IActionResult Post(long id, [FromBody] Card model)
     {
+      using var db = new CustomerManagementContext();
+      try
+      {
+        var newCard = db.Cards.Add(model);
+        newCard.Entity.CustomerId = id;
+        db.SaveChanges();
+        return StatusCode(StatusCodes.Status201Created, newCard.Entity);
 
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(StatusCodes.Status500InternalServerError, ex);
+      }
     }
 
-    // DELETE api/values/5
+
+
+
+    // PATCH customer/{id}
+    [HttpPatch("{id}")]
+    public IActionResult Put(long id, [FromBody] JsonPatchDocument<Customer> patch)
+    {
+      using var db = new CustomerManagementContext();
+
+      try
+      {
+        var customer = db.Customers.FirstOrDefault(customer => customer.Id == id);
+        if (customer != null)
+        {
+          patch.ApplyTo(customer, ModelState);
+          db.SaveChanges();
+
+          return StatusCode(StatusCodes.Status200OK, customer);
+        }
+        else
+        {
+          return StatusCode(StatusCodes.Status204NoContent);
+        }
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(StatusCodes.Status500InternalServerError, ex);
+      }
+    }
+
+    // DELETE customer/{id}
     [HttpDelete("{id}")]
-    public void Delete(int id)
+    public IActionResult Delete(int id)
     {
+      // Database will delete cards on cascade. The software shouldn't be aware
+      // of that implementaion detail.
+      using var db = new CustomerManagementContext();
+
+      try
+      {
+        var customer = new Customer() { Id = id };
+        db.Customers.Attach(customer);
+        db.Customers.Remove(customer);
+        db.SaveChanges();
+
+        return StatusCode(StatusCodes.Status200OK);
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(StatusCodes.Status500InternalServerError, ex);
+      }
+    }
+
+    // GET customer/{id}/card
+    [HttpGet("{id}/card")]
+    public IActionResult Get(long id, [FromBody] Card card)
+    {
+      using var db = new CustomerManagementContext();
+
+      try
+      {
+
+
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(StatusCodes.Status500InternalServerError, ex);
+      }
     }
   }
 }

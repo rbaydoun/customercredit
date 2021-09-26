@@ -9,6 +9,5 @@ namespace CustomerManagement.Datastore.Entities
     public string Address { get; set; }
     public DateTime DateOfBirth { get; set; }
     public List<CreditCard> Cards { get; set; }
-
   }
 }
